@@ -14,7 +14,7 @@ OUTFILE := kernel.elf
 OUTSYM := kernel.sym
 OUTISO := os.iso
 
-OBJECTS = $(OBJDIR)/boot.o $(OBJDIR)/main.o
+OBJECTS = $(OBJDIR)/boot.o $(OBJDIR)/string.o $(OBJDIR)/framebuffer.o $(OBJDIR)/main.o
 
 all: clean $(OBJDIR) $(ISODIR) kernel iso
 

@@ -1,7 +1,7 @@
-char *video_mem = (char *) 0x000B8000;
+#include "framebuffer.h"
 
-void kmain(void) {
-    video_mem[0] = 'A';
-    video_mem[1] = 0x28;
+void k_main(void) {
+    k_fbclear();
+    k_fbputstring(0, 0, "Booty", FB_RED, FB_BLACK);
     return;
 }
