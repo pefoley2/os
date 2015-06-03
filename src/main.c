@@ -1,7 +1,15 @@
-#include "framebuffer.h"
+#include <multiboot.h>
 
-void k_main(void) {
+#include <early_fb.h>
+
+void k_main(multiboot_info_t *mbd, unsigned int magic) {
     k_fbclear();
-    k_fbputstring(0, 0, "Entering kernel main!", FB_WHITE, FB_BLACK);
+    k_fbprint("Entering kernel main!");
+    if(magic != MULTIBOOT_BOOTLOADER_MAGIC) {
+        k_fbputstring(0, 1,
+                "Error: Not loaded by multiboot bootloader. Will now exit.",
+                FB_RED, FB_BLACK);
+        return;
+    }
     return;
 }

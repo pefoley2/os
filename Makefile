@@ -1,52 +1,66 @@
-LDFLAGS = -T link.ld -melf_i386
-CFLAGS = -g -c -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
-		 -nostartfiles -nodefaultlibs -Wall
-ASFLAGS = -g -f elf32
-
 CC = gcc
 AS = nasm
 
-SRCDIR := src
-OBJDIR := build
-ISODIR := iso
+SRCDIR = src
+ISODIR = cdimage
+UTILDIR = util
 
-OUTFILE := kernel.elf
-OUTSYM := kernel.sym
-OUTISO := os.iso
+LDFLAGS = -T $(SRCDIR)/link.ld -melf_i386
 
-OBJECTS = $(OBJDIR)/boot.o $(OBJDIR)/string.o $(OBJDIR)/framebuffer.o $(OBJDIR)/main.o
+CFLAGS = -g -c -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector
+CFLAGS += -nostartfiles -nodefaultlibs -Wall
 
-all: clean $(OBJDIR) $(ISODIR) kernel iso
+INC = -I$(SRCDIR)/include/ -I$(SRCDIR)/drivers/include/
+
+ASFLAGS = -g -f elf32
+
+
+OUTELF = kernel.elf
+OUTSYM = kernel.sym
+OUTISO = os.iso
+
+
+OBJECTS = $(patsubst %.c, %.o, $(wildcard src/*.c))
+OBJECTS += $(patsubst %.c, %.o, $(wildcard src/*/*.c))
+ASMOBJECTS = $(patsubst %s, %o, $(wildcard src/*.s))
+
+
+all: kernel iso
+	@echo "Build complete"
 
 clean:
-	- rm -f $(OBJDIR)/*.o
-	- rm -rf $(OBJDIR)
-	- rm -rf $(ISODIR)
-	- rm -f $(OUTFILE)
-	- rm -f $(OUTSYM)
-	- rm -f $(OUTISO)
-
-$(OBJDIR):
-	mkdir -p $@
+	@echo "Cleaning objects..."
+	@- rm -f $(SRCDIR)/*.o
+	@- rm -f $(SRCDIR)/*/*.o
+	@- rm -rf $(ISODIR)
+	@- rm -f $(OUTELF)
+	@- rm -f $(OUTSYM)
+	@- rm -f $(OUTISO)
+	@echo "Objects cleaned"
 
 $(ISODIR):
-	mkdir -p $@
+	@ mkdir -p $@
 
-kernel: $(OBJECTS)
-	ld $(LDFLAGS) $(OBJECTS) -o $(OUTFILE)
-	objcopy --only-keep-debug $(OUTFILE) $(OUTSYM)
-	objcopy --strip-debug $(OUTFILE)
+kernel: $(ASMOBJECTS) $(OBJECTS)
+	@echo "Linking Kernel..."
+	@ ld $(LDFLAGS) $(ASMOBJECTS) $(OBJECTS) -o $(OUTELF)
+	@echo "Generating symbol file..."
+	@ objcopy --only-keep-debug $(OUTELF) $(OUTSYM)
+	@ objcopy --strip-debug $(OUTELF)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.s
-	$(AS) $(ASFLAGS) -o $@ $^
+$(SRCDIR)/%.o: $(SRCDIR)/%.s
+	@echo "AS" "$<"
+	@ $(AS) $(ASFLAGS) -o $@ $^
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) -o $@ $^
+$(SRCDIR)/%.o: $(SRCDIR)/%.c
+	@echo "CC" "$<"
+	@ $(CC) $(CFLAGS) $(INC) -o $@ $^
 
-iso: kernel
-	mkdir -p $(ISODIR)/boot/grub
-	cp stage2_eltorito $(ISODIR)/boot/grub/
-	cp menu.lst $(ISODIR)/boot/grub/
-	cp $(OUTFILE) $(ISODIR)/boot/
-	genisoimage -R -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 \
-		-A os -input-charset utf8 -quiet -boot-info-table -o $(OUTISO) iso
+iso: $(ISODIR) kernel
+	@echo "Making CD image..."
+	@ mkdir -p $(ISODIR)/
+	@ cp -r $(UTILDIR)/boot/ $(ISODIR)/
+	@ cp $(OUTELF) $(ISODIR)/boot/
+	@ genisoimage \
+		-R -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 \
+		-A os -input-charset utf8 -quiet -boot-info-table -o $(OUTISO) $(ISODIR)

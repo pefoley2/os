@@ -14,8 +14,9 @@ section .text:
     extern k_main
 
     loader:
-        mov eax, 0xFFFFFFFF
         mov esp, kernel_stack + KERNEL_STACK_SIZE
+        push eax
+        push ebx
         call k_main
 
     .loop:

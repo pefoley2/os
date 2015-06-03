@@ -25,6 +25,9 @@ enum FB_COLORS {
 };
 typedef enum FB_COLORS FB_COLOR;
 
+#define FB_BG_COLOR FB_BLACK
+#define FB_FG_COLOR FB_WHITE
+
 
 void k_fbwritecell(unsigned int cell, char ascii, FB_COLOR fg, FB_COLOR bg);
 
@@ -41,6 +44,10 @@ void k_fbwritecell(unsigned int cell, char ascii, FB_COLOR fg, FB_COLOR bg);
 void k_fbputchar(char x, char y, char ascii, FB_COLOR fg, FB_COLOR bg);
 
 void k_fbputstring(char x, char y, char *string, FB_COLOR fg, FB_COLOR bg);
+
+void k_fbprintc(char ch);
+
+void k_fbprint(char *string);
 
 void k_fbputall(char ascii, FB_COLOR fg, FB_COLOR bg);
 

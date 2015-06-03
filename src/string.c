@@ -1,4 +1,4 @@
-#include "string.h"
+#include <string.h>
 
 unsigned int k_strlen(char *string) {
     unsigned int len;
