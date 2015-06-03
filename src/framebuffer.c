@@ -20,12 +20,18 @@ void k_fbputchar(char x, char y, char ascii, FB_COLOR fg, FB_COLOR bg) {
 }
 
 void k_fbputstring(char x, char y, char *string, FB_COLOR fg, FB_COLOR bg) {
-   unsigned int strlen = k_strlen(string);
-   unsigned int done = 0;
-   while(done < strlen) {
-        k_fbputchar(x, y, string[done], fg, bg);
+    unsigned int strlen = k_strlen(string);
+    unsigned int done = 0;
+    while(done < strlen) {
+        char c = string[done];
+        if(c == '\n') {
+            y++;
+            x = 0;
+        } else {
+            k_fbputchar(x, y, c, fg, bg);
+            x++;
+        }
         done++;
-        x++;
         if(x > 79) {
             y++;
             x = 0;
@@ -34,8 +40,8 @@ void k_fbputstring(char x, char y, char *string, FB_COLOR fg, FB_COLOR bg) {
             x = 0;
             y = 0;
         }
-   }
-   return;
+    }
+    return;
 }
 
 void k_fbputall(char ascii, FB_COLOR fg, FB_COLOR bg) {
