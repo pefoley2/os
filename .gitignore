@@ -1,5 +1,5 @@
 build/*
-iso/*
+cdimage/*
 *.o
 *.elf
 *.sym
