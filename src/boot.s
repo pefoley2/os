@@ -1,6 +1,7 @@
 section .__mbHeader
     MAGIC_NUMBER equ 0x1BADB002
-    FLAGS        equ 0x00
+    MEMINFO      equ 1 << 1
+    FLAGS        equ MEMINFO | 0x0
     CHECKSUM     equ - (MAGIC_NUMBER + FLAGS)
     
     align 0x04

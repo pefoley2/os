@@ -4,3 +4,4 @@ cdimage/*
 *.elf
 *.sym
 *.iso
+*.swp
