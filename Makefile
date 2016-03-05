@@ -30,37 +30,40 @@ all: kernel iso
 
 clean:
 	@echo "Cleaning objects..."
-	@- rm -f $(SRCDIR)/*.o
-	@- rm -f $(SRCDIR)/*/*.o
-	@- rm -rf $(ISODIR)
-	@- rm -f $(OUTELF)
-	@- rm -f $(OUTSYM)
-	@- rm -f $(OUTISO)
+	@rm -f $(SRCDIR)/*.o
+	@rm -f $(SRCDIR)/*/*.o
+	@rm -rf $(ISODIR)
+	@rm -f $(OUTELF)
+	@rm -f $(OUTSYM)
+	@rm -f $(OUTISO)
 	@echo "Objects cleaned"
 
-$(ISODIR):
-	@ mkdir -p $@
+kernel: $(OUTELF)
 
-kernel: $(ASMOBJECTS) $(OBJECTS)
+$(OUTELF): $(ASMOBJECTS) $(OBJECTS)
 	@echo "Linking Kernel..."
-	@ ld $(LDFLAGS) $(ASMOBJECTS) $(OBJECTS) -o $(OUTELF)
+	@ld $(LDFLAGS) $(ASMOBJECTS) $(OBJECTS) -o $(OUTELF)
 	@echo "Generating symbol file..."
-	@ objcopy --only-keep-debug $(OUTELF) $(OUTSYM)
-	@ objcopy --strip-debug $(OUTELF)
+	@objcopy --only-keep-debug $(OUTELF) $(OUTSYM)
+	@objcopy --strip-debug $(OUTELF)
 
 $(SRCDIR)/%.o: $(SRCDIR)/%.s
 	@echo "AS" "$<"
-	@ $(AS) $(ASFLAGS) -o $@ $^
+	@$(AS) $(ASFLAGS) -o $@ $^
 
 $(SRCDIR)/%.o: $(SRCDIR)/%.c
 	@echo "CC" "$<"
-	@ $(CC) $(CFLAGS) $(INC) -o $@ $^
+	@$(CC) $(CFLAGS) $(INC) -o $@ $^
 
-iso: $(ISODIR) kernel
+iso: $(OUTISO)
+
+$(OUTISO): $(OUTELF)
 	@echo "Making CD image..."
-	@ mkdir -p $(ISODIR)/
-	@ cp -r $(UTILDIR)/boot/ $(ISODIR)/
-	@ cp $(OUTELF) $(ISODIR)/boot/
-	@ genisoimage \
+	@mkdir -p $(ISODIR)/
+	@cp -r $(UTILDIR)/boot/ $(ISODIR)/
+	@cp $(OUTELF) $(ISODIR)/boot/
+	@genisoimage \
 		-R -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 \
 		-A os -input-charset utf8 -quiet -boot-info-table -o $(OUTISO) $(ISODIR)
+
+.PHONY: all kernel iso
