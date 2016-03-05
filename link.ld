@@ -2,6 +2,7 @@ ENTRY(loader)
 
 SECTIONS {
     . = 0x00100000;
+    kernel_start = .;
 
     .__mbHeader :
     {
@@ -28,4 +29,5 @@ SECTIONS {
         *(COMMON)
         *(.bss)
     }
+    kernel_end = .;
 }

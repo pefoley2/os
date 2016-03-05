@@ -5,12 +5,12 @@ SRCDIR = src
 ISODIR = cdimage
 UTILDIR = util
 
-LDFLAGS = -T $(SRCDIR)/link.ld -melf_i386
+LDFLAGS = -T link.ld -melf_i386
 
 CFLAGS = -g -c -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector
 CFLAGS += -nostartfiles -nodefaultlibs -Wall
 
-INC = -I$(SRCDIR)/include/ -I$(SRCDIR)/drivers/include/
+INC = -Iinclude/
 
 ASFLAGS = -g -f elf32
 

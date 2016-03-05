@@ -1,14 +1,26 @@
+#include <console.h>
+#include <memory.h>
+
 #include <multiboot.h>
 
-#include <vga_term.h>
+
+extern int kernel_start;
+extern int kernel_end;
+
 
 void k_main(multiboot_info_t *mbd, unsigned int magic) {
-    term_init();
-    term_putstr("Terminal initialized\n");
-    term_flushbuffer();
-
     if(magic != MULTIBOOT_BOOTLOADER_MAGIC) {
         return;
     }
-    return;
+    init_early_console();
+    if(!(mbd->flags & 0x01)) {
+        kprint("The bootloader isn't giving us any memory information\n");
+        kprint("Terminating execution!\n");
+    }
+    kprint("Kernel size: ");
+    kprint_hex((&kernel_end - &kernel_start) * sizeof(int), 8);
+    kprint(" Bytes\n");
+    
+    init_physpage_map();
+    parse_mb_map(mbd);
 }
